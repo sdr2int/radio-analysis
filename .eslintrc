@@ -1,0 +1,459 @@
+
+env:
+  node:                          true
+  commonjs:                      true
+  es2021:                        true
+
+extends:                         eslint:recommended
+
+parserOptions:
+  ecmaVersion: 9
+
+rules:
+  no-throw-literal:              off
+  strict:                        off
+  no-undef:                      off
+  quotes:                        off
+  no-magic-numbers:              off
+  no-console:                    off
+  no-mixed-operators:            off
+  no-sync:                       off
+  no-continue:                   off
+  no-delete-var:                 off
+  no-multi-str:                  off
+  no-floating-decimal:           off
+  camelcase:                     off
+
+  no-unused-vars:                warn
+  no-implicit-globals:           warn
+
+
+  block-scoped-var:              warn
+  no-shadow:                     warn
+  dot-notation:                  warn
+  no-else-return:                warn
+  no-empty-pattern:              warn
+  no-extra-bind:                 warn
+  no-implicit-coercion:          warn
+  no-use-before-define:          warn
+  no-invalid-this:               warn
+  no-var:                        warn
+  prefer-spread:                 warn
+  no-labels:                     warn
+  no-lone-blocks:                warn
+  no-self-assign:                warn
+  no-self-compare:               warn
+  no-sequences:                  warn
+  no-unused-expressions:         warn
+  no-useless-call:               warn
+  no-useless-concat:             warn
+  no-useless-escape:             warn
+  no-useless-return:             warn
+  no-void:                       warn
+  no-with:                       warn
+  vars-on-top:                   warn
+  wrap-iife:                     warn
+  yoda:                          warn
+  init-declarations:             warn
+  no-shadow-restricted-names:    warn
+  no-undef-init:                 warn
+  callback-return:               warn
+  global-require:                warn
+  handle-callback-err:           warn
+  no-mixed-requires:             warn
+  no-path-concat:                warn
+  array-bracket-spacing:         warn
+  block-spacing:                 warn
+  brace-style:                   warn
+  func-name-matching:            warn
+  func-names:                    warn
+  keyword-spacing:               warn
+  line-comment-position:         warn
+  lines-around-directive:        warn
+  max-lines:                     warn
+  no-inline-comments:            warn
+  no-bitwise:                    warn
+  newline-per-chained-call:      warn
+  new-parens:                    warn
+  newline-after-var:             warn
+  no-array-constructor:          warn
+  no-lonely-if:                  warn
+  no-multi-assign:               warn
+  no-multiple-empty-lines:       warn
+  no-negated-condition:          warn
+  no-nested-ternary:             warn
+  no-tabs:                       warn
+  no-unneeded-ternary:           warn
+  no-trailing-spaces:            warn
+  no-whitespace-before-property: warn
+  space-before-blocks:           warn
+  space-before-function-paren:   warn
+  space-infix-ops:               warn
+  space-unary-ops:               warn
+  arrow-spacing:                 warn
+  no-useless-computed-key:       warn
+  no-useless-rename:             warn
+  object-shorthand:              warn
+  prefer-arrow-callback:         warn
+  prefer-destructuring:          warn
+  prefer-template:               warn
+  template-curly-spacing:        warn
+  object-curly-spacing:          warn
+
+  # padding-line-between-statements:
+  #   - warn
+  #   -
+  #     blankLine: always
+  #     prev: block-like
+  #     next: *
+
+  arrow-body-style:
+    - warn
+    - never
+  rest-spread-spacing:
+    - warn
+    - never
+  arrow-parens:
+    - warn
+    - as-needed
+  space-in-parens:
+    - warn
+    - never
+  padded-blocks:
+    - warn
+    - never
+  operator-linebreak:
+    - warn
+    - before
+  one-var:
+    - warn
+    - never
+  max-params:
+    - warn
+    - 3
+  max-depth:
+    - warn
+    - 2
+  max-statements:
+    - warn
+    - 20
+  max-nested-callbacks:
+    - warn
+    - 5
+  key-spacing:
+    - warn
+    - align: value
+      mode: minimum
+  func-style:
+    - warn
+    - declaration
+    - allowArrowFunctions: true
+  consistent-this:
+    - warn
+    - do-not-use-that
+  comma-spacing:
+    - warn
+    - before: false
+      after: true
+  comma-style:
+    - warn
+    - last
+  comma-dangle:
+    - warn
+    - always-multiline
+  no-multi-spaces:
+    - warn
+    - exceptions:
+        VariableDeclarator: true
+  no-cond-assign:
+    - warn
+    - always
+  no-extra-parens:
+    - warn
+    - all
+  indent:
+    - warn
+    - 2
+  complexity:
+    - warn
+    - 2000
+  linebreak-style:
+    - warn
+    - unix
+  dot-location:
+    - warn
+    - property
+  curly:
+    - warn
+    - multi-or-nest
+  semi:
+    - warn
+    - never
+  quote-props:
+    - warn
+    - as-needed
+
+
+globals:
+  E                      : false
+  pg                     : false
+  search                 : false
+  angular                : true
+  R                      : false
+  $                      : true
+  debug                  : false
+  process                : false
+  Buffer                 : false
+  jsYaml                 : false
+  prettyError            : false
+  prettyjson             : false
+  pe                     : false
+  pp                     : false
+  ENV                    : false
+  moment                 : false
+  redis                  : false
+  got                    : false
+  feedparser             : false
+  thenifyAll             : false
+  pgPromise              : false
+  ioredis                : false
+
+
+  F                      : false
+  T                      : false
+  __                     : false
+  add                    : false
+  addIndex               : false
+  adjust                 : false
+  all                    : false
+  allPass                : false
+  always                 : false
+  and                    : false
+  any                    : false
+  anyPass                : false
+  ap                     : false
+  aperture               : false
+  append                 : false
+  apply                  : false
+  applySpec              : false
+  ascend                 : false
+  assoc                  : false
+  assocPath              : false
+  binary                 : false
+  bind                   : false
+  both                   : false
+  call                   : false
+  chain                  : false
+  clamp                  : false
+  clone                  : false
+  comparator             : false
+  complement             : false
+  compose                : false
+  composeK               : false
+  composeP               : false
+  concat                 : false
+  cond                   : false
+  construct              : false
+  constructN             : false
+  contains               : false
+  converge               : false
+  countBy                : false
+  curry                  : false
+  curryN                 : false
+  dec                    : false
+  descend                : false
+  defaultTo              : false
+  difference             : false
+  differenceWith         : false
+  dissoc                 : false
+  dissocPath             : false
+  divide                 : false
+  drop                   : false
+  dropLast               : false
+  dropLastWhile          : false
+  dropRepeats            : false
+  dropRepeatsWith        : false
+  dropWhile              : false
+  either                 : false
+  empty                  : false
+  eqBy                   : false
+  eqProps                : false
+  equals                 : false
+  evolve                 : false
+  filter                 : false
+  find                   : false
+  findIndex              : false
+  findLast               : false
+  findLastIndex          : false
+  flatten                : false
+  flip                   : false
+  forEach                : false
+  forEachObjIndexed      : false
+  fromPairs              : false
+  groupBy                : false
+  groupWith              : false
+  gt                     : false
+  gte                    : false
+  has                    : false
+  hasIn                  : false
+  head                   : false
+  identical              : false
+  identity               : false
+  ifElse                 : false
+  inc                    : false
+  indexBy                : false
+  indexOf                : false
+  init                   : false
+  insert                 : false
+  insertAll              : false
+  intersection           : false
+  intersectionWith       : false
+  intersperse            : false
+  into                   : false
+  invert                 : false
+  invertObj              : false
+  invoker                : false
+  is                     : false
+  isArrayLike            : false
+  isEmpty                : false
+  isNil                  : false
+  join                   : false
+  juxt                   : false
+  keys                   : false
+  keysIn                 : false
+  last                   : false
+  lastIndexOf            : false
+  length                 : false
+  lens                   : false
+  lensIndex              : false
+  lensPath               : false
+  lensProp               : false
+  lift                   : false
+  liftN                  : false
+  lt                     : false
+  lte                    : false
+  map                    : false
+  mapAccum               : false
+  mapAccumRight          : false
+  mapObjIndexed          : false
+  match                  : false
+  mathMod                : false
+  max                    : false
+  maxBy                  : false
+  mean                   : false
+  median                 : false
+  memoize                : false
+  merge                  : false
+  mergeAll               : false
+  mergeWith              : false
+  mergeWithKey           : false
+  min                    : false
+  minBy                  : false
+  modulo                 : false
+  multiply               : false
+  nAry                   : false
+  negate                 : false
+  none                   : false
+  not                    : false
+  nth                    : false
+  nthArg                 : false
+  objOf                  : false
+  of                     : false
+  omit                   : false
+  once                   : false
+  or                     : false
+  over                   : false
+  pair                   : false
+  partial                : false
+  partialRight           : false
+  partition              : false
+  path                   : false
+  pathEq                 : false
+  pathOr                 : false
+  pathSatisfies          : false
+  pick                   : false
+  pickAll                : false
+  pickBy                 : false
+  pipe                   : false
+  pipeK                  : false
+  pipeP                  : false
+  pluck                  : false
+  prepend                : false
+  product                : false
+  project                : false
+  prop                   : false
+  propEq                 : false
+  propIs                 : false
+  propOr                 : false
+  propSatisfies          : false
+  props                  : false
+  range                  : false
+  reduce                 : false
+  reduceBy               : false
+  reduceRight            : false
+  reduceWhile            : false
+  reduced                : false
+  reject                 : false
+  remove                 : false
+  repeat                 : false
+  replace                : false
+  reverse                : false
+  scan                   : false
+  sequence               : false
+  set                    : false
+  slice                  : false
+  sort                   : false
+  sortBy                 : false
+  sortWith               : false
+  split                  : false
+  splitAt                : false
+  splitEvery             : false
+  splitWhen              : false
+  subtract               : false
+  sum                    : false
+  symmetricDifference    : false
+  symmetricDifferenceWith: false
+  tail                   : false
+  take                   : false
+  takeLast               : false
+  takeLastWhile          : false
+  takeWhile              : false
+  tap                    : false
+  test                   : false
+  times                  : false
+  toLower                : false
+  toPairs                : false
+  toPairsIn              : false
+  toString               : false
+  toUpper                : false
+  transduce              : false
+  transpose              : false
+  traverse               : false
+  trim                   : false
+  tryCatch               : false
+  type                   : false
+  unapply                : false
+  unary                  : false
+  uncurryN               : false
+  unfold                 : false
+  union                  : false
+  unionWith              : false
+  uniq                   : false
+  uniqBy                 : false
+  uniqWith               : false
+  unless                 : false
+  unnest                 : false
+  until                  : false
+  update                 : false
+  useWith                : false
+  values                 : false
+  valuesIn               : false
+  view                   : false
+  when                   : false
+  where                  : false
+  whereEq                : false
+  without                : false
+  xprod                  : false
+  zip                    : false
+  zipObj                 : false
+  zipWith                : false

@@ -49,7 +49,7 @@ window.ws.inBuffer = []
 window.ws.socket.binaryType = 'arraybuffer'
 window.ws.socket.onmessage = window.ws.inBuffer.push
 
-ws.events = {}
+ws.events = {connect: []}
 
 ws.outBuffer = []
 

@@ -3,6 +3,7 @@
 require('fast-require')({global: true, toRoot:   ['ramda']})
 global.uws = uWebSocketsJs.App()
 
+
 let start = new Date()
 const T = () => {
   const message = `${-(start - new Date())}ms`
@@ -17,39 +18,60 @@ global.pp = tap(x =>
     dashColor: 'grey',
   })}${T()}`))
 
-uws
-.get('/*', uwebsocketServe.serveDir('front'))
-.ws('/*', {
-  compression:      uws.DEDICATED_COMPRESSOR_32KB,
-  maxPayloadLength: 16 * 1024 * 1024,
-  idleTimeout:      28,
+global.pe = tap(x =>
+  process.stdout.write(`${prettyjson.render(x, {
+    dashColor: 'red',
+  })}${T()}`))
 
-  open: ws => {},
+const msgpack = msgpack5()
+const events = []
 
-  message: (ws, message, isBinary) => {
-    try {
-      const data = notepackIo.decode(Buffer.from(message))
+global.emit = curry((ws, event, data) => {
+  const o = {[event]: data}
 
-      for (const event in data) {
-        if (!events[event]) {
-          pe({error: `No handler for "${event}"`, data})
-          continue
-        }
+  if (ws.readyState == ws.OPEN) {
+    ws.send(msgpack.encode(o), true)
+    if (!noLog.test(event)) po(o)
+    return
+  }
 
-        for (const f of events[event]) {
-          f(ws, data[event])
-            .then(x => x && emit(ws, event, x))
-            .catch(x => pe(x) && emit(ws, `${event}:error`, x))
-        }
-
-        if (!noLog.test(event)) pp({[event]: data[event]})
-      }
-    } catch (e) {
-      pe(e, message)
-    }
-  },
-
-  close: (ws, code, message) => {},
+  ws.outBuffer.push([event, data])
+  return data
 })
 
-uws.listen('127.0.0.1', 3000, listenSocket => pp({[3000]: 'listening'}))
+uws
+  .get('/*', uwebsocketServe.serveDir('front'))
+  .ws('/*', {
+    compression:      uws.DEDICATED_COMPRESSOR_32KB,
+    maxPayloadLength: 16 * 1024 * 1024,
+    idleTimeout:      28,
+
+    open: ws => {},
+
+    message: (ws, message, isBinary) => {
+      try {
+        const data = msgpack.decode(Buffer.from(message))
+
+        for (const event in data) {
+          if (!events[event]) {
+            pe({error: `No handler for "${event}"`, data})
+            continue
+          }
+
+          for (const f of events[event]) {
+            f(ws, data[event])
+              .then(x => x && emit(ws, event, x))
+              .catch(x => pe(x) && emit(ws, `${event}:error`, x))
+          }
+
+          if (!noLog.test(event)) pp({[event]: data[event]})
+        }
+      } catch (e) {
+        pe(e, message)
+      }
+    },
+
+    close: (ws, code, message) => {},
+  })
+
+uws.listen('127.0.0.1', 3000, listenSocket => pp({3000: 'listening'}))
