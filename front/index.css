@@ -1,0 +1,11 @@
+body {
+  padding: 0;
+  margin: 0;
+  font-family: sans-serif;
+  user-select: none;
+}
+#container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
