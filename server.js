@@ -3,6 +3,7 @@
 require('fast-require')({global: true, toRoot:   ['ramda']})
 global.uws = uWebSocketsJs.App()
 
+const noLog = /ping/
 
 let start = new Date()
 const T = () => {
@@ -26,7 +27,13 @@ global.pe = tap(x =>
 const msgpack = msgpack5()
 const events = []
 
-global.emit = curry((ws, event, data) => {
+uws.on = (message, f) => {
+  if (!events[message]) events[message] = []
+
+  events[message].push(compose(Promise.resolve.bind(Promise), f))
+}
+
+uws.emit = curry((ws, event, data) => {
   const o = {[event]: data}
 
   if (ws.readyState == ws.OPEN) {
@@ -60,8 +67,8 @@ uws
 
           for (const f of events[event]) {
             f(ws, data[event])
-              .then(x => x && emit(ws, event, x))
-              .catch(x => pe(x) && emit(ws, `${event}:error`, x))
+              .then(x => x && uws.emit(ws, event, x))
+              .catch(x => pe(x) && uws.emit(ws, `${event}:error`, x))
           }
 
           if (!noLog.test(event)) pp({[event]: data[event]})
@@ -74,4 +81,5 @@ uws
     close: (ws, code, message) => {},
   })
 
+uws.on('ping', () => {})
 uws.listen('127.0.0.1', 3000, listenSocket => pp({3000: 'listening'}))
