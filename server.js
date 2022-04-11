@@ -16,14 +16,11 @@ const T = () => {
 }
 
 global.pp = tap(x =>
-  process.stdout.write(`${prettyjson.render(x, {
-    dashColor: 'grey',
-  })}${T()}`))
-
+  process.stdout.write(`${prettyjson.render(x, {keysColor: 'green', dashColor: 'green'})}${T()}`))
 global.pe = tap(x =>
-  process.stdout.write(`${prettyjson.render(x, {
-    dashColor: 'red',
-  })}${T()}`))
+  process.stdout.write(`${prettyjson.render(x, {keysColor: 'red', dashColor: 'red'})}${T()}`))
+global.po = tap(x =>
+  process.stdout.write(`${prettyjson.render(x, {keysColor: 'yellow', dashColor: 'yellow'})}${T()}`))
 
 const msgpack = msgpack5()
 const events = []
@@ -83,23 +80,61 @@ uws
   })
 
 uws.on('ping', () => {})
+uws.on("station:create", station => pg.insert('station', station))
+uws.on('stations', () => pg.exec('SELECT * FROM station'))
+
 pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
   global.pg = client
+  pg.insert = (table, data) => pg.execParams(`INSERT INTO "${table}" (${keys(data)}) VALUES(${map(x => `$${x + 1}`, range(0, length(keys(data))))}) RETURNING *;`, values(data))
+
+
+  pg.scan = (query, params = [], handler, batch = 100) => {
+    const cursor = slice(0, 20, newHash(query))
+
+    return pgLibpq.connect(E.postgres.connection)
+      .then(pool => {
+        const close = () => pool.exec(`CLOSE "${cursor}"; COMMIT`).then(() => pool.finish())
+
+        return pool.exec(`BEGIN; DECLARE "${cursor}" CURSOR FOR ${query};`)
+          .then(() => {
+            const next = () => pool.execParams(`FETCH ${batch} "${cursor}"`, params)
+              .then(V)
+              .then(x => {
+                if (isEmpty(x))
+                  return close()
+                return handler(x).then(next)
+              })
+
+            return next()
+          })
+          .catch(tap(e => {
+            console.error(e)
+            return close()
+          }))
+      })
+  }
+
+
   chokidar.watch('./csv').on('change', (filename, event) => {
     fs.createReadStream(filename)
       .pipe(csvParser(['date', 'time', 'colorcode', 'type', 'cid', 'rid', 'dcc', 'options']))
-      .on('data', ({date, time, colorcode, type, cid, rid, dcc, options}) => pg.execParams('INSERT INTO session VALUES($1, $2, $3, $4, $5, $6, $7)', [
-        new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', date)} ${time}`)), colorcode, type, cid, rid, dcc, options,
-      ]).catch(console.error))
+      .on('data', x =>
+        pg.insert('session', mergeWith(identity, omit(['date', 'time'], x), {station: filename, created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}))
+          .catch(console.error),
+      )
       .on('end', () => {})
   })
 
-  pg.exec('SELECT date FROM session').catch(x => {
-    pg.exec(`DROP TABLE session;
-      CREATE TABLE session (created_at TIMESTAMP WITH TIME ZONE NOT NULL, colorcode INT, type TEXT, cid INT, rid INT, dcc INT, options TEXT);
-      CREATE UNIQUE INDEX session_cid_idx ON public."session" (cid,rid,created_at,colorcode);
-    `)
+  pg.exec(`SELECT * FROM station`).catch(e => {
+    pg.exec(`DROP TABLE IF EXISTS station;
+      CREATE TABLE station (station VARCHAR(255), date TIMESTAMP WITH TIME ZONE NOT NULL, lat REAL, long REAL, address VARCHAR(255), path TEXT);
+      CREATE INDEX station_idx ON public."station" (station, date, address);`)
   })
+
+  pg.exec('SELECT dateeee FROM session').catch(e => pg.exec(`DROP TABLE IF EXISTS session;
+      CREATE TABLE session (station VARCHAR(255), created_at TIMESTAMP WITH TIME ZONE NOT NULL, colorcode INT, type TEXT, cid INT, rid INT, dcc INT, options TEXT);
+      CREATE UNIQUE INDEX session_uniq_idx ON public."session" (station, cid, rid, created_at, colorcode);
+    `))
 
   uws.listen('127.0.0.1', 3000, listenSocket => pp({3000: 'listening'}))
 })
