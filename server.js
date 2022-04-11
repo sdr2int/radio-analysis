@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-require('fast-require')({global: true, toRoot:   ['ramda']})
+require('fast-require')({global: true, toRoot:   ['ramda'], require: ['fs']})
+
 global.uws = uWebSocketsJs.App()
 
 const noLog = /ping/
@@ -82,4 +83,23 @@ uws
   })
 
 uws.on('ping', () => {})
-uws.listen('127.0.0.1', 3000, listenSocket => pp({3000: 'listening'}))
+pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
+  global.pg = client
+  chokidar.watch('./csv').on('change', (filename, event) => {
+    fs.createReadStream(filename)
+      .pipe(csvParser(['date', 'time', 'colorcode', 'type', 'cid', 'rid', 'dcc', 'options']))
+      .on('data', ({date, time, colorcode, type, cid, rid, dcc, options}) => pg.execParams('INSERT INTO session VALUES($1, $2, $3, $4, $5, $6, $7)', [
+        new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', date)} ${time}`)), colorcode, type, cid, rid, dcc, options,
+      ]).catch(console.error))
+      .on('end', () => {})
+  })
+
+  pg.exec('SELECT date FROM session').catch(x => {
+    pg.exec(`DROP TABLE session;
+      CREATE TABLE session (created_at TIMESTAMP WITH TIME ZONE NOT NULL, colorcode INT, type TEXT, cid INT, rid INT, dcc INT, options TEXT);
+      CREATE UNIQUE INDEX session_cid_idx ON public."session" (cid,rid,created_at,colorcode);
+    `)
+  })
+
+  uws.listen('127.0.0.1', 3000, listenSocket => pp({3000: 'listening'}))
+})

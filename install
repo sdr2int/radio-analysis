@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+npm install
+sudo su postgres -c "psql -c 'CREATE DATABASE \"radio-analysis\"'
