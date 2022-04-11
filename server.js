@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
-require('fast-require')({global: true, toRoot:   ['ramda'], require: ['fs']})
+require('fast-require')({global: true, toRoot:   ['ramda'], require: ['fs'], without: ['chart.js', 'chartjs-plugin-crosshair']})
 
 global.uws = uWebSocketsJs.App()
 
-const noLog = /ping/
+global.newHash = (x = new Date().getTime() + Math.random()) =>
+  jsSha3.sha3_256(`${String(x)}Ködkürt / Foghorn`)
+
+const noLog = /ping|session:all|station:all/
 
 let start = new Date()
 const T = () => {
@@ -80,8 +83,12 @@ uws
   })
 
 uws.on('ping', () => {})
-uws.on("station:create", station => pg.insert('station', station))
+uws.on("station:create", (ws, station) => pg.insert('station', station))
 uws.on('stations', () => pg.exec('SELECT * FROM station'))
+uws.on('session:all', (ws, x) => pg.scan('SELECT * FROM session ORDER BY created_at DESC', [], s => uws.emit(ws, 'session:all', s)))
+uws.on('station:all', (ws, x) => pg.exec('SELECT * FROM station'))
+
+const CONNECTION_STRING = 'postgresql://localhost/radioanalysis'
 
 pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
   global.pg = client
@@ -91,18 +98,17 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
   pg.scan = (query, params = [], handler, batch = 100) => {
     const cursor = slice(0, 20, newHash(query))
 
-    return pgLibpq.connect(E.postgres.connection)
+    return pgLibpq.connect(CONNECTION_STRING)
       .then(pool => {
         const close = () => pool.exec(`CLOSE "${cursor}"; COMMIT`).then(() => pool.finish())
 
         return pool.exec(`BEGIN; DECLARE "${cursor}" CURSOR FOR ${query};`)
           .then(() => {
             const next = () => pool.execParams(`FETCH ${batch} "${cursor}"`, params)
-              .then(V)
               .then(x => {
                 if (isEmpty(x))
                   return close()
-                return handler(x).then(next)
+                return Promise.resolve(handler(x)).then(next)
               })
 
             return next()
@@ -131,7 +137,7 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
       CREATE INDEX station_idx ON public."station" (station, date, address);`)
   })
 
-  pg.exec('SELECT dateeee FROM session').catch(e => pg.exec(`DROP TABLE IF EXISTS session;
+  pg.exec('SELECT created_at FROM session').catch(e => pg.exec(`DROP TABLE IF EXISTS session;
       CREATE TABLE session (station VARCHAR(255), created_at TIMESTAMP WITH TIME ZONE NOT NULL, colorcode INT, type TEXT, cid INT, rid INT, dcc INT, options TEXT);
       CREATE UNIQUE INDEX session_uniq_idx ON public."session" (station, cid, rid, created_at, colorcode);
     `))

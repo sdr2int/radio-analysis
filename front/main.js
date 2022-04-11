@@ -1,7 +1,8 @@
 for (const m in R)
   if (['T', 'F'].indexOf(m) == -1) window[m] = R[m]
+
 window.E = {
-  nodebug: ['ping', 'directions', 'spectrogram'],
+  nodebug: ['session:all'],
 }
 
 window.popup = {close: () => {}}
@@ -170,3 +171,13 @@ mapLoaded.then(() => {
     M.onclick({lat, long: lng})
   })
 })
+
+window.Session = {
+  list: [],
+}
+window.Station = {
+  list: [],
+}
+ws.on('session:all', map(s => window.Session.list.push(s)))
+ws.on('station:all', s => Station.list = s)
+ws.on('connect', () => ws.emit({'session:all': {}, 'station:all': {}}))
