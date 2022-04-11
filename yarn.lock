@@ -182,6 +182,16 @@ character-parser@^2.1.1:
   dependencies:
     is-regex "^1.0.3"
 
+chart.js@^3.7.1:
+  version "3.7.1"
+  resolved "https://registry.yarnpkg.com/chart.js/-/chart.js-3.7.1.tgz#0516f690c6a8680c6c707e31a4c1807a6f400ada"
+  integrity sha512-8knRegQLFnPQAheZV8MjxIXc5gQEfDFD897BJgv/klO/vtIyFFmgMXrNfgrXpbTr/XbTturxRgxIXx/Y+ASJBA==
+
+chartjs-plugin-crosshair@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/chartjs-plugin-crosshair/-/chartjs-plugin-crosshair-1.2.0.tgz#54c8223ed40db4a5c380f17967fcf1a11cb2a284"
+  integrity sha512-yohsbME+wT1ODBdErBzWnC6xUDcn2tLeWmGjGDTykjpiT7+FMgibffajxqaCVmdzselxNPirpt76vx33EewSSQ==
+
 chokidar@^3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
@@ -251,11 +261,6 @@ css@^3.0.0:
     inherits "^2.0.4"
     source-map "^0.6.1"
     source-map-resolve "^0.6.0"
-
-csv-parse@^5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/csv-parse/-/csv-parse-5.0.4.tgz#97e5e654413bcf95f2714ce09bcb2be6de0eb8e3"
-  integrity sha512-5AIdl8l6n3iYQYxan5djB5eKDa+vBnhfWZtRpJTcrETWfVLYN0WSj3L9RwvgYt+psoO77juUr8TG8qpfGZifVQ==
 
 csv-parser@^3.0.0:
   version "3.0.0"
@@ -451,6 +456,11 @@ is-regex@^1.0.3:
   dependencies:
     call-bind "^1.0.2"
     has-tostringtag "^1.0.0"
+
+js-sha3@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
+  integrity sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q==
 
 js-stringify@^1.0.1:
   version "1.0.2"
