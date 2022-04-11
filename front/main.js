@@ -173,11 +173,41 @@ mapLoaded.then(() => {
 })
 
 window.Session = {
-  list: [],
+  list:    [],
+  changed: false,
 }
 window.Station = {
   list: [],
 }
-ws.on('session:all', map(s => window.Session.list.push(s)))
+ws.on('session:all', map(s => {
+  window.Session.list.push(s)
+  window.Session.changed = true
+}))
+
+setInterval(() => {
+  if (!window.Session.changed) return
+
+  const datasets  = values(addIndex(map)((x, i) => ({
+    label:       head(x).station,
+    fill:        false,
+    borderColor: ['#fc0', 'rgb(75, 192, 192)'][i],
+    data:        countBy(x => x.created_at.toISOString().slice(0, 13), x),
+    // backgroundColor: [
+    //
+    //   pattern.draw('square', '#ff6384'),
+    //   pattern.draw('circle', '#36a2eb'),
+    //   pattern.draw('diamond', '#cc65fe'),
+    //   pattern.draw('triangle', '#ffce56'),
+    // ],
+
+  }), groupBy(prop('station'), Session.list)))
+
+  if (!window.Graph)
+    createGraph(datasets)
+  else {
+    Graph.data.datasets = datasets
+    Graph.update()
+  }
+}, 1000)
 ws.on('station:all', s => Station.list = s)
 ws.on('connect', () => ws.emit({'session:all': {}, 'station:all': {}}))

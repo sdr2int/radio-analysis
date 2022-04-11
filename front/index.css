@@ -13,4 +13,23 @@ body {
   width: 100vw;
   height: 100vh;
   background: #000;
+  overflow: hidden;
+}
+#graph {
+  position: absolute;
+  left: 0;
+  width: 100vw;
+  height: 15vh;
+  bottom: 0;
+  z-index: 10;
+  background: rgba(26,24,22,0.8);
+  color: #fff;
+}
+.reset-zoom {
+  position: absolute;
+  top: 50px;
+  right: 30px;
+}
+.mapboxgl-ctrl-bottom-right {
+  display: none;
 }
