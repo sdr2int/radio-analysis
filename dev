@@ -1,4 +1,5 @@
 node_modules/.bin/stylus --watch front/index.styl &
 node_modules/.bin/pug --watch front/index.pug &
 node-dev server.js &
+webpack w ./graph.js -o front &
 wait

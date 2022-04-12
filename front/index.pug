@@ -13,6 +13,7 @@ html
     script(src='/chart.min.js')
     script(src='/chartjs-plugin-crosshair.min.js')
     script(src='/datepicker-full.min.js')
+    //- script(src='https://cdn.jsdelivr.net/npm/graphology-library@0.7.1/dist/graphology-library.min.js')
       
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/css/datepicker.min.css">
     //- link(href='/mapbox-gl.css' rel='stylesheet')
@@ -23,6 +24,7 @@ html
 body
   
   #container
+    #sigma
     #panel
       h4 Редагування посту радіорозвідки
       #values
@@ -53,5 +55,6 @@ body
       canvas#graph(width='100vw' height='15vh')
                     
   script(src="/main.js")
-  script(src="/graphs.js")
   script(src="/map.js")
+  script(src="/timechart.js")
+  script(src='/graphology.js')
