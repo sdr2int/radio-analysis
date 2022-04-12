@@ -165,6 +165,7 @@ Station.edit = x => {
   mapObjIndexed((v, k) => {
     if (I(k)) I(k).value = v
   }, x)
+  DatePicker.setDate(new Date(x.date))
 }
 Station.save = () => {
   ws.emit({'station:save': evolve({date: d => DatePicker.getDate()}, mergeAll(map(x => ({[x.id]: x.value}), I('values').S('input'))))})
@@ -188,6 +189,7 @@ setInterval(() => {
   if (!window.Session.changed) return
 
   const [f, t] = DateRange.getDates()
+
   const datasets  = values(addIndex(map)((x, i) => ({
     label:       head(x).station,
     fill:        false,
@@ -209,10 +211,15 @@ setInterval(() => {
     Graph.data.datasets = datasets
     Graph.update()
   }
-}, 1000)
+}, 300)
+
+
 ws.on('stations', s => {
   Station.list = s
   M.updateStation()
+})
+ws.on('station:save', x => {
+  ws.emit({stations: {}})
 })
 
 Datepicker.locales.uk = {
@@ -223,7 +230,7 @@ Datepicker.locales.uk = {
   monthsShort: ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"],
   today:       "Сьогодні",
   clear:       "Очистити",
-  format:      "dd.mm.yyyy",
+  format:      "yyyy-mm-dd",
   weekStart:   1,
 }
 window.DatePicker = new Datepicker(I('date'), {autohide: true, language: 'uk'})
@@ -239,6 +246,11 @@ DateRange.change = () => {
   ws.emit({session: DateRange.getDates()})
   ws.emit({stations: {}})
 }
+
+S('.daterange').map(x => x.addEventListener("changeDate", () => {
+  M.updateStation()
+  console.log('changeDate')
+}))
 
 ws.on('connect', DateRange.change)
 

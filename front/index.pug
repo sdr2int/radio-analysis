@@ -26,7 +26,7 @@ body
     #panel
       h4 Редагування посту радіорозвідки
       #values
-        input#id
+        input#id(type='hidden')
         .title Назва
         input#station(value='Пост 1')
         .title IP адреса
@@ -42,12 +42,13 @@ body
         input#position(type='button' value='Змінити позицію' onclick='Station.position()')
         input#sync(type='button' onclick=`Station.sync(I("station").value)` value=`Перевірити зв'язок`)
         input#save(type='button' onclick=`Station.save()` value=`Зберегти`)
+        input#hide(type='button' onclick=`I('panel').style.display = 'none'` value=`Відмінити`)
           
       
     #map
     #graphContainer
       #daterange
-        input#start.daterange(onchange='DateRange.change()')
+        input#start.daterange(ondatechange='DateRange.change()')
         input#end.daterange(onchange='DateRange.change()')
       canvas#graph(width='100vw' height='15vh')
                     

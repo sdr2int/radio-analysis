@@ -102,7 +102,14 @@ M.updateStation = () => mapLoaded.then(() => {
     if (!x.position) return
 
     // debugger
-    const sessions = filter(y => y.station = x.station && previousDate ? y.created_at > previousDate : y.created_at < x.date, sortBy(prop('created_at'), Session.list))
+    const [f, t] = DateRange.getDates()
+    const sessions = filter(
+      y => y.station == x.station
+      && (previousDate ? y.created_at < previousDate : true)
+      && y.created_at > x.date
+      && y.created_at > f
+      && y.created_at < t,
+      sortBy(prop('created_at'), Session.list))
 
     previousDate = x.date
 
@@ -117,7 +124,7 @@ M.updateStation = () => mapLoaded.then(() => {
         type: "Point", coordinates: reverse(coordinates),
       },
     }
-  }, sortBy(x => x.date, Station.list)))
+  }, sortBy(x => -x.date, Station.list)))
 
   const bboxes = [sortBy(x => x[0], C), sortBy(x => x[1], C)]
 
