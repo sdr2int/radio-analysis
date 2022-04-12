@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('fast-require')({global: true, toRoot:   ['ramda'], require: ['fs'], without: ['chart.js', 'chartjs-plugin-crosshair']})
+require('fast-require')({global: true, toRoot:   ['ramda'], require: ['fs', 'child_process'], without: ['chart.js', 'chartjs-plugin-crosshair'], as: {child_process: 'cp'}})
 
 global.uws = uWebSocketsJs.App()
 
@@ -87,6 +87,20 @@ uws.on("station:create", (ws, station) => pg.insert('station', station))
 uws.on('stations', () => pg.exec('SELECT * FROM station'))
 uws.on('session', (ws, x) => pg.scan('SELECT * FROM session WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC', x, s => uws.emit(ws, 'session', s)))
 uws.on('station:all', (ws, x) => pg.exec('SELECT * FROM station'))
+uws.on('station:sync', (ws, station) =>
+  pg.execParams('SELECT * FROM station WHERE station = $1 ORDER BY date DESC LIMIT 1 ', [station]).then(([{address, path, station}]) => {
+    try {
+      cp.execSync(tap(console.log, `scp "${address}:${path}" "csv/${station}.csv"`))
+    } catch (e) {
+      console.log(e)
+      return 'error'
+    }
+
+    return 'ok'
+  }),
+)
+uws.on('station:save', (ws, data) => pg.insert('station', data).catch(console.log))
+
 
 const CONNECTION_STRING = 'postgresql://localhost/radioanalysis'
 
@@ -122,11 +136,14 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
   }
 
 
-  chokidar.watch('./csv').on('change', (filename, event) => {
+  chokidar.watch('./csv').on('all', (event, filename) => {
+    if (includes(event, ['addDir', 'unlink'])) return
+
+    console.log({filename, event})
     fs.createReadStream(filename)
       .pipe(csvParser(['date', 'time', 'colorcode', 'type', 'cid', 'rid', 'dcc', 'options']))
       .on('data', x =>
-        pg.insert('session', mergeWith(identity, omit(['date', 'time'], x), {station: filename, created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}))
+        pg.insert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}))
           .catch(console.error),
       )
       .on('end', () => {})
@@ -134,7 +151,7 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
 
   pg.exec(`SELECT * FROM station`).catch(e => {
     pg.exec(`DROP TABLE IF EXISTS station;
-      CREATE TABLE station (station VARCHAR(255), date TIMESTAMP WITH TIME ZONE NOT NULL, lat REAL, long REAL, address VARCHAR(255), path TEXT);
+      CREATE TABLE station (station VARCHAR(255), date TIMESTAMP WITH TIME ZONE NOT NULL, position VARCHAR(255), address VARCHAR(255), path TEXT);
       CREATE INDEX station_idx ON public."station" (station, date, address);`)
   })
 

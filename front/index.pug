@@ -23,6 +23,26 @@ html
 body
   
   #container
+    #panel
+      h4 Редагування посту радіорозвідки
+      #values
+        .title Назва
+        input#station(value='Пост 1')
+        .title IP адреса
+        input#address(value='127.0.0.1')
+        .title Дата встановлення
+        input#date
+        .title путь до файла
+        input#path(value='~/ForDemo.csv')
+        .title координати
+        input#position(disabled)
+          
+      div#controls
+        input#position(type='button' value='Змінити позицію' onclick='Station.position()')
+        input#sync(type='button' onclick=`Station.sync(I("station").value)` value=`Перевірити зв'язок`)
+        input#save(type='button' onclick=`Station.save()` value=`Зберегти`)
+          
+      
     #map
     #graphContainer
       #daterange
@@ -32,3 +52,4 @@ body
                     
   script(src="/main.js")
   script(src="/graphs.js")
+  script(src="/map.js")

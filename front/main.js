@@ -1,6 +1,8 @@
 for (const m in R)
   if (['T', 'F'].indexOf(m) == -1) window[m] = R[m]
 
+const merge = mergeWith(identity)
+
 window.E = {
   nodebug: ['session'],
 }
@@ -8,8 +10,6 @@ window.E = {
 window.popup = {close: () => {}}
 window.msgpack = msgpack5()
 window.idb = new IdbKvStore('df')
-
-mapboxgl.accessToken = 'pk.eyJ1IjoiYW5ld3N3YXRjaGVyY29tIiwiYSI6ImNsMW0wejRtbTBiM2QzY3BxYnMzaXR6eXQifQ.gXsA_bB8KJjrsP_bW3OVFQ'
 
 window.pp = tap(x => console.log(JSON.stringify(x, null, ' ')))
 window.pe = tap(x => console.error(JSON.stringify(x, null, ' ')))
@@ -19,15 +19,6 @@ window.timer = (x, start = window.timer[x]) => {
   window.timer[x] = new Date().getTime()
 }
 
-window.M = new mapboxgl.Map({
-  container:         'map',
-  style:             'mapbox://styles/mapbox/dark-v10',
-  zoom:              1,
-  boxZoom:           true,
-  maxZoom:           17,
-  center:    [31, 49],
-  zoom:      16,
-})
 
 window.I = selector => document.getElementById(replace(/^#/, '', selector))
 window.S = selector =>
@@ -160,17 +151,6 @@ idb.get('buffer')
 
 ws.connect().on('ping', identity)
 
-window.mapLoaded = new Promise(resolve => M.on('load', resolve))
-
-M.onclick = () => {}
-
-mapLoaded.then(() => {
-  M.on('click', e => {
-    const {lngLat: {lat, lng}} = e
-
-    M.onclick({lat, long: lng})
-  })
-})
 
 window.Session = {
   list:    [],
@@ -179,6 +159,20 @@ window.Session = {
 window.Station = {
   list: [],
 }
+
+Station.save = () => {
+  ws.emit({'station:save': evolve({date: d => DatePicker.getDate()}, mergeAll(map(x => ({[x.id]: x.value}), I('values').S('input'))))})
+}
+Station.sync = name => {
+  ws.emit({'station:sync': name})
+}
+Station.position = () => {
+  M.onclick = ({lat, long}) => {
+    I('position').value = `${parseFloat(lat.toFixed(3))},${parseFloat(long.toFixed(3))}`
+    M.onclick = () => {}
+  }
+}
+
 ws.on('session', map(s => {
   window.Session.list.push(s)
   window.Session.changed = true
@@ -211,7 +205,10 @@ setInterval(() => {
     Graph.update()
   }
 }, 1000)
-ws.on('station:all', s => Station.list = s)
+ws.on('stations', s => {
+  Station.list = s
+  M.updateStation()
+})
 
 Datepicker.locales.uk = {
   days:        ["Неділя", "Понеділок", "Вівторок", "Середа", "Четвер", "П'ятниця", "Субота"],
@@ -224,14 +221,26 @@ Datepicker.locales.uk = {
   format:      "dd.mm.yyyy",
   weekStart:   1,
 }
+window.DatePicker = new Datepicker(I('date'), {autohide: true, language: 'uk'})
+DatePicker.setDate(new Date())
+
 window.DateRange = new DateRangePicker(I('daterange'), {autohide: true, language: 'uk'})
-const now = new Date('2016-08-01')
+const now = new Date('2015-08-01')
 const from = clone(now)
 
 from.setMonth(from.getMonth() - 3)
 DateRange.setDates(from, now)
 DateRange.change = () => {
   ws.emit({session: DateRange.getDates()})
+  ws.emit({stations: {}})
 }
 
-ws.on('connect', () => ws.emit({session: DateRange.getDates(), 'station:all': {}}))
+ws.on('connect', DateRange.change)
+
+ws.on('station:sync', status => {
+  if (status == 'ok') {
+    I('sync').value = `Є зв'язок`
+    DateRange.change()
+  } else
+    I('sync').value = `Немає зв'язку. Перевірити знову`
+})

@@ -55,3 +55,22 @@ input {
   background: #262422;
   color: #fff;
 }
+#panel {
+  position: fixed;
+  height: 500px;
+  width: 300px;
+  background: #262422;
+  padding: 10px;
+  color: #fff;
+  margin: 10px;
+}
+#panel .title {
+  margin-top: 10px;
+}
+#panel #controls {
+  display: flex;
+  flex-direction: column;
+}
+#panel #controls input {
+  margin-top: 10px;
+}
