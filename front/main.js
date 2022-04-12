@@ -160,6 +160,12 @@ window.Station = {
   list: [],
 }
 
+Station.edit = x => {
+  I('panel').style.display = 'block'
+  mapObjIndexed((v, k) => {
+    if (I(k)) I(k).value = v
+  }, x)
+}
 Station.save = () => {
   ws.emit({'station:save': evolve({date: d => DatePicker.getDate()}, mergeAll(map(x => ({[x.id]: x.value}), I('values').S('input'))))})
 }
@@ -181,7 +187,6 @@ ws.on('session', map(s => {
 setInterval(() => {
   if (!window.Session.changed) return
 
-
   const [f, t] = DateRange.getDates()
   const datasets  = values(addIndex(map)((x, i) => ({
     label:       head(x).station,
@@ -196,7 +201,7 @@ setInterval(() => {
     //   pattern.draw('triangle', '#ffce56'),
     // ],
 
-  }), groupBy(prop('station'), filter(x => x.created_at > f && x.created_at < t, Session.list))))
+  }), groupBy(prop('station'), filter(x => x.created_at > f && x.created_at < t, sortBy(prop('created_at'), Session.list)))))
 
   if (!window.Graph)
     createGraph(datasets)

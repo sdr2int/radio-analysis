@@ -83,7 +83,7 @@ uws
   })
 
 uws.on('ping', () => {})
-uws.on("station:create", (ws, station) => pg.insert('station', station))
+uws.on("station:create", (ws, station) => pg.upsert('station', station))
 uws.on('stations', () => pg.exec('SELECT * FROM station'))
 uws.on('session', (ws, x) => pg.scan('SELECT * FROM session WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC', x, s => uws.emit(ws, 'session', s)))
 uws.on('station:all', (ws, x) => pg.exec('SELECT * FROM station'))
@@ -99,14 +99,16 @@ uws.on('station:sync', (ws, station) =>
     return 'ok'
   }),
 )
-uws.on('station:save', (ws, data) => pg.insert('station', data).catch(console.log))
+uws.on('station:save', (ws, data) => pg.upsert('station', data).catch(console.log))
 
 
 const CONNECTION_STRING = 'postgresql://localhost/radioanalysis'
 
 pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
   global.pg = client
-  pg.insert = (table, data) => pg.execParams(`INSERT INTO "${table}" (${keys(data)}) VALUES(${map(x => `$${x + 1}`, range(0, length(keys(data))))}) RETURNING *;`, values(data))
+  pg.upsert = (table, data) => pg.execParams(tap(console.log, `INSERT INTO "${table}"
+  (${keys(data)}) VALUES(${map(x => `$${x + 1}`, range(0, length(keys(data))))})
+  ON CONFLICT (id) DO UPDATE SET ${join(',', values(addIndex(map)((v, k) => `${v} = $${k + 1}`, keys(data))))}  RETURNING *;`), values(data))
 
 
   pg.scan = (query, params = [], handler, batch = 100) => {
@@ -137,13 +139,13 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
 
 
   chokidar.watch('./csv').on('all', (event, filename) => {
-    if (includes(event, ['addDir', 'unlink'])) return
+    if (includes(event, ['addDir', 'unlink']) || test(/\.csv$/, filename)) return
 
     console.log({filename, event})
     fs.createReadStream(filename)
       .pipe(csvParser(['date', 'time', 'colorcode', 'type', 'cid', 'rid', 'dcc', 'options']))
       .on('data', x =>
-        pg.insert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}))
+        pg.upsert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}))
           .catch(console.error),
       )
       .on('end', () => {})
@@ -151,8 +153,10 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
 
   pg.exec(`SELECT * FROM station`).catch(e => {
     pg.exec(`DROP TABLE IF EXISTS station;
-      CREATE TABLE station (station VARCHAR(255), date TIMESTAMP WITH TIME ZONE NOT NULL, position VARCHAR(255), address VARCHAR(255), path TEXT);
-      CREATE INDEX station_idx ON public."station" (station, date, address);`)
+      CREATE TABLE station (id SERIAL, station VARCHAR(255), date TIMESTAMP WITH TIME ZONE NOT NULL, position VARCHAR(255), address VARCHAR(255), path TEXT);
+      CREATE INDEX station_idx ON public."station" (station, date, address);
+      CREATE UNIQUE INDEX station_id_idx ON public."station" (id);
+    `)
   })
 
   pg.exec('SELECT created_at FROM session').catch(e => pg.exec(`DROP TABLE IF EXISTS session;

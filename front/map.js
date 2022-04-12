@@ -84,32 +84,7 @@ M.on('load', () => {
       layers: ['clusters'],
     })
 
-    M.getSource('sources').getClusterLeaves(features[0].properties.cluster_id, features[0].properties.point_count, 0, (err, features) => {
-      map(Search.addTag, uniq(map(path(['properties', 'id']), features)))
-    })
-    UI.updateURL()
-    Search.search()
-    // M.getSource('sources').getClusterExpansionZoom(
-    //   clusterId,
-    //   (err, zoom) => {
-    //     if (err) return
-    //
-    //     M.easeTo({
-    //       center: features[0].geometry.coordinates,
-    //       zoom,
-    //     })
-    //   },
-    // )
-  })
-
-  // When a click event occurs on a feature in
-  // the unclustered-point layer, open a popup at
-  // the location of the feature, with
-  // description HTML from its properties.
-  M.on('click', 'unclustered-point', e => {
-    map(Search.addTag, uniq(map(path(['properties', 'id']), e.features)))
-    UI.updateURL()
-    Search.search()
+    Station.edit(path([0, 'properties'], features))
   })
 
   M.on('mouseenter', 'clusters', () => {
@@ -122,8 +97,14 @@ M.on('load', () => {
 
 M.updateStation = () => mapLoaded.then(() => {
   const C = []
+  let previousDate = null
   const features = reject(isNil, map(x => {
     if (!x.position) return
+
+    // debugger
+    const sessions = filter(y => y.station = x.station && previousDate ? y.created_at > previousDate : y.created_at < x.date, sortBy(prop('created_at'), Session.list))
+
+    previousDate = x.date
 
     const coordinates = map(parseFloat, split(',', x.position))
 
@@ -131,18 +112,14 @@ M.updateStation = () => mapLoaded.then(() => {
 
     return {
       type:       "Feature",
-      properties: {
-        id: x, date: x.date, point_count: 100,
-      },
-      geometry: {
+      properties: merge({point_count: length(sessions)}, x),
+      geometry:   {
         type: "Point", coordinates: reverse(coordinates),
       },
     }
-  }, Station.list))
+  }, sortBy(x => x.date, Station.list)))
 
   const bboxes = [sortBy(x => x[0], C), sortBy(x => x[1], C)]
-
-  debugger
 
   if (length(bboxes[0])) {
     M.fitBounds([[

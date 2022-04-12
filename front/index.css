@@ -57,12 +57,14 @@ input {
 }
 #panel {
   position: fixed;
-  height: 500px;
   width: 300px;
   background: #262422;
   padding: 10px;
   color: #fff;
   margin: 10px;
+}
+#panel input {
+  width: 100%;
 }
 #panel .title {
   margin-top: 10px;
@@ -73,4 +75,5 @@ input {
 }
 #panel #controls input {
   margin-top: 10px;
+  width: 100%;
 }
