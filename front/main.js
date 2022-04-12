@@ -205,12 +205,7 @@ setInterval(() => {
 
   }), groupBy(prop('station'), filter(x => x.created_at > f && x.created_at < t, sortBy(prop('created_at'), Session.list)))))
 
-  if (!window.Graph)
-    createGraph(datasets)
-  else {
-    Graph.data.datasets = datasets
-    Graph.update()
-  }
+  updateTimeChart(datasets)
 }, 300)
 
 
