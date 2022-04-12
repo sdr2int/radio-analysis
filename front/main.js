@@ -2,7 +2,7 @@ for (const m in R)
   if (['T', 'F'].indexOf(m) == -1) window[m] = R[m]
 
 window.E = {
-  nodebug: ['session:all'],
+  nodebug: ['session'],
 }
 
 window.popup = {close: () => {}}
@@ -179,7 +179,7 @@ window.Session = {
 window.Station = {
   list: [],
 }
-ws.on('session:all', map(s => {
+ws.on('session', map(s => {
   window.Session.list.push(s)
   window.Session.changed = true
 }))
@@ -187,6 +187,8 @@ ws.on('session:all', map(s => {
 setInterval(() => {
   if (!window.Session.changed) return
 
+
+  const [f, t] = DateRange.getDates()
   const datasets  = values(addIndex(map)((x, i) => ({
     label:       head(x).station,
     fill:        false,
@@ -200,7 +202,7 @@ setInterval(() => {
     //   pattern.draw('triangle', '#ffce56'),
     // ],
 
-  }), groupBy(prop('station'), Session.list)))
+  }), groupBy(prop('station'), filter(x => x.created_at > f && x.created_at < t, Session.list))))
 
   if (!window.Graph)
     createGraph(datasets)
@@ -210,4 +212,26 @@ setInterval(() => {
   }
 }, 1000)
 ws.on('station:all', s => Station.list = s)
-ws.on('connect', () => ws.emit({'session:all': {}, 'station:all': {}}))
+
+Datepicker.locales.uk = {
+  days:        ["Неділя", "Понеділок", "Вівторок", "Середа", "Четвер", "П'ятниця", "Субота"],
+  daysShort:   ["Нед", "Пнд", "Втр", "Срд", "Чтв", "Птн", "Суб"],
+  daysMin:     ["Нд", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+  months:      ["Cічень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"],
+  monthsShort: ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"],
+  today:       "Сьогодні",
+  clear:       "Очистити",
+  format:      "dd.mm.yyyy",
+  weekStart:   1,
+}
+window.DateRange = new DateRangePicker(I('daterange'), {autohide: true, language: 'uk'})
+const now = new Date('2016-08-01')
+const from = clone(now)
+
+from.setMonth(from.getMonth() - 3)
+DateRange.setDates(from, now)
+DateRange.change = () => {
+  ws.emit({session: DateRange.getDates()})
+}
+
+ws.on('connect', () => ws.emit({session: DateRange.getDates(), 'station:all': {}}))

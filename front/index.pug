@@ -12,7 +12,9 @@ html
     script(src='/mapbox-gl.js')
     script(src='/chart.min.js')
     script(src='/chartjs-plugin-crosshair.min.js')
+    script(src='/datepicker-full.min.js')
       
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.2.0/dist/css/datepicker.min.css">
     //- link(href='/mapbox-gl.css' rel='stylesheet')
     //- <link href="/jspanel.css" rel="stylesheet">
     //- <script src="/jspanel.js"></script>
@@ -22,7 +24,11 @@ body
   
   #container
     #map
-    canvas#graph(width='100vw' height='15vh')
+    #graphContainer
+      #daterange
+        input#start.daterange(onchange='DateRange.change()')
+        input#end.daterange(onchange='DateRange.change()')
+      canvas#graph(width='100vw' height='15vh')
                     
   script(src="/main.js")
   script(src="/graphs.js")

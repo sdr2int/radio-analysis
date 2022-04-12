@@ -15,11 +15,12 @@ body {
   background: #000;
   overflow: hidden;
 }
-#graph {
+#graph,
+#graphContainer {
   position: absolute;
   left: 0;
   width: 100vw;
-  height: 15vh;
+  height: 15vw;
   bottom: 0;
   z-index: 10;
   background: rgba(26,24,22,0.8);
@@ -32,4 +33,25 @@ body {
 }
 .mapboxgl-ctrl-bottom-right {
   display: none;
+}
+#daterange {
+  position: absolute;
+  z-index: 10000;
+}
+.datepicker-view {
+  background: #262422;
+}
+.datepicker-cell.range,
+.datepicker-cell.range-start,
+.datepicker-cell.range-end,
+.datepicker-controls .button {
+  background: #262422 !important;
+  color: #fc0 !important;
+}
+.datepicker-cell:hover {
+  background: #000;
+}
+input {
+  background: #262422;
+  color: #fff;
 }

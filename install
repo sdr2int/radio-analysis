@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 
 npm install
-sudo su postgres -c "psql -c 'CREATE DATABASE \"radio-analysis\"'
+cp ../node_modules/chart.js/dist/chart.min.js front
+cp ../node_modules/chartjs-plugin-crosshair/dist/chartjs-plugin-crosshair.min.js front
+cp -ruv node_modules/vanillajs-datepicker/dist/js/datepicker-full.min.js front/
+sudo su postgres -c "psql -c 'CREATE DATABASE \"radio-analysis\"'"

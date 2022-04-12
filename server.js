@@ -7,7 +7,7 @@ global.uws = uWebSocketsJs.App()
 global.newHash = (x = new Date().getTime() + Math.random()) =>
   jsSha3.sha3_256(`${String(x)}Ködkürt / Foghorn`)
 
-const noLog = /ping|session:all|station:all/
+const noLog = /ping|session|station:all/
 
 let start = new Date()
 const T = () => {
@@ -85,7 +85,7 @@ uws
 uws.on('ping', () => {})
 uws.on("station:create", (ws, station) => pg.insert('station', station))
 uws.on('stations', () => pg.exec('SELECT * FROM station'))
-uws.on('session', (ws, x) => pg.scan('SELECT * FROM session WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC', x, s => uws.emit(ws, 'session:all', s)))
+uws.on('session', (ws, x) => pg.scan('SELECT * FROM session WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC', x, s => uws.emit(ws, 'session', s)))
 uws.on('station:all', (ws, x) => pg.exec('SELECT * FROM station'))
 
 const CONNECTION_STRING = 'postgresql://localhost/radioanalysis'
