@@ -85,7 +85,7 @@ uws
 uws.on('ping', () => {})
 uws.on("station:create", (ws, station) => pg.insert('station', station))
 uws.on('stations', () => pg.exec('SELECT * FROM station'))
-uws.on('session:all', (ws, x) => pg.scan('SELECT * FROM session ORDER BY created_at DESC', [], s => uws.emit(ws, 'session:all', s)))
+uws.on('session', (ws, x) => pg.scan('SELECT * FROM session WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC', x, s => uws.emit(ws, 'session:all', s)))
 uws.on('station:all', (ws, x) => pg.exec('SELECT * FROM station'))
 
 const CONNECTION_STRING = 'postgresql://localhost/radioanalysis'
@@ -99,12 +99,13 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
     const cursor = slice(0, 20, newHash(query))
 
     return pgLibpq.connect(CONNECTION_STRING)
+      .then(pool => pool.exec('BEGIN').then(() => pool))
       .then(pool => {
         const close = () => pool.exec(`CLOSE "${cursor}"; COMMIT`).then(() => pool.finish())
 
-        return pool.exec(`BEGIN; DECLARE "${cursor}" CURSOR FOR ${query};`)
+        return pool.execParams(`DECLARE "${cursor}" CURSOR FOR ${query};`, params)
           .then(() => {
-            const next = () => pool.execParams(`FETCH ${batch} "${cursor}"`, params)
+            const next = () => pool.exec(`FETCH ${batch} "${cursor}"`)
               .then(x => {
                 if (isEmpty(x))
                   return close()
