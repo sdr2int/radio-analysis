@@ -248,3 +248,20 @@ ws.on('station:sync', status => {
   } else
     I('sync').value = `Немає зв'язку. Перевірити знову`
 })
+
+const mode = {
+  graph: () => {
+    S('#mode input').map(x => x.classList.remove('selected'))
+    I('graph-mode').classList.add('selected')
+    I('map').style.display = 'none'
+    I('graph').style.display = 'block'
+  },
+  map:   () => {
+    S('#mode input').map(x => x.classList.remove('selected'))
+    I('map-mode').classList.add('selected')
+    I('graph').style.display = 'none'
+    I('map').style.display = 'block'
+  },
+}
+
+mode.graph()

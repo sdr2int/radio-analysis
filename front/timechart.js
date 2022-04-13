@@ -9,7 +9,7 @@ const updateTimeChart = datasets => {
 }
 
 const createTimeChart = datasets => {
-  window.TimeChart = new Chart('graph', {
+  window.TimeChart = new Chart('timechart', {
     type:    'line',
     data:    {
       datasets,

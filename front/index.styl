@@ -15,7 +15,7 @@ body
   background: black
   overflow: hidden;
 
-#graph, #graphContainer
+#timechart, #timechartContainer
   position: absolute;
   left: 0
   width: 100vw
@@ -71,7 +71,18 @@ input
       margin-top: 10px
       width: 100%
 
-#sigma
+#graph
   position: fixed;
   width: 100vw;
   height: 100vh;
+
+#mode
+  position: fixed;
+  right: 40px
+  top: 40px
+  z-index: 10000;
+  input
+    padding: 10px
+
+.selected
+  color: orange

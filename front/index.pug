@@ -26,7 +26,12 @@ html
 body
   
   #container
-    #sigma
+    #mode
+      input#graph-mode.selected(type='button' value='Граф' onclick='mode.graph()')
+      input#map-mode(type='button' value='Карта' onclick='mode.map()')
+        
+    #graph
+      
     #panel
       h4 Редагування посту радіорозвідки
       #values
@@ -50,11 +55,12 @@ body
           
       
     #map
-    #graphContainer
+      
+    #timechartContainer
       #daterange
         input#start.daterange(ondatechange='DateRange.change()')
         input#end.daterange(onchange='DateRange.change()')
-      canvas#graph(width='100vw' height='15vh')
+      canvas#timechart(width='100vw' height='15vh')
                     
   script(src="/main.js")
   script(src="/map.js")
