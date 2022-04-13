@@ -269,3 +269,11 @@ const mode = {
 }
 
 mode.graph()
+
+const uploadCSV = () => {
+  fetch(`csv?fileName=${prompt('Введіть назву посту')}`, {
+    method:  'POST',
+    headers: {"Content-Type": "multipart/form-data;"},
+    body:    document.getElementById('csv').files[0],
+  })
+}

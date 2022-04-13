@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 require('fast-require')({global: true, toRoot:   ['ramda'], require: ['fs', 'child_process'], without: ['chart.js', 'chartjs-plugin-crosshair'], as: {child_process: 'cp'}})
+const querystring = require("querystring")
 
 global.uws = uWebSocketsJs.App()
 
@@ -48,6 +49,22 @@ uws.emit = curry((ws, event, data) => {
 })
 
 uws
+  .post('/csv', async (res, req) => {
+    const {fileName} = {...querystring.parse(req.getQuery())}
+
+    res.writeHeader('Access-Control-Allow-Origin', req.getHeader('origin'))
+      .onAborted(() => console.error('UPLOAD ABORTED'))
+    let writeStream = fs.createWriteStream(`./csv/${fileName}.csv`)
+
+    await new Promise((resolve, reject) => {
+      writeStream.on('error', reject)
+      res.onData((chunk, isLast) => {
+        writeStream.write(Buffer.from(chunk.slice(0)))
+        isLast && resolve()
+      })
+    })
+    res.end('file uploaded')
+  })
   .get('/*', uwebsocketServe.serveDir('front'))
   .ws('/*', {
     compression:      uws.DEDICATED_COMPRESSOR_32KB,
@@ -106,9 +123,9 @@ const CONNECTION_STRING = 'postgresql://localhost/radioanalysis'
 
 pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
   global.pg = client
-  pg.upsert = (table, data) => pg.execParams(tap(console.log, `INSERT INTO "${table}"
+  pg.upsert = (table, data, conflict = 'id') => pg.execParams(tap(console.log, `INSERT INTO "${table}"
   (${keys(data)}) VALUES(${map(x => `$${x + 1}`, range(0, length(keys(data))))})
-  ON CONFLICT (id) DO UPDATE SET ${join(',', values(addIndex(map)((v, k) => `${v} = $${k + 1}`, keys(data))))}  RETURNING *;`), values(data))
+  ON CONFLICT (${conflict}) DO UPDATE SET ${join(',', values(addIndex(map)((v, k) => `${v} = $${k + 1}`, keys(data))))}  RETURNING *;`), values(data))
 
 
   pg.scan = (query, params = [], handler, batch = 100) => {
@@ -139,13 +156,14 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
 
 
   chokidar.watch('./csv').on('all', (event, filename) => {
-    if (includes(event, ['addDir', 'unlink']) || test(/\.csv$/, filename)) return
+    console.log({filename, event})
+    if (includes(event, ['addDir', 'unlink']) || !test(/\.csv$/, filename)) return
 
     console.log({filename, event})
     fs.createReadStream(filename)
       .pipe(csvParser(['date', 'time', 'colorcode', 'type', 'cid', 'rid', 'dcc', 'options']))
       .on('data', x =>
-        pg.upsert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}))
+        pg.upsert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}), 'station, cid, rid, created_at, colorcode')
           .catch(console.error),
       )
       .on('end', () => {})
