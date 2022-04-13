@@ -1,5 +1,5 @@
 module.exports = {
   output: {
-    filename: 'graph.js',
+    filename: 'sigma-bundle.js',
   },
 };

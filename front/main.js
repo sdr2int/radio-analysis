@@ -195,14 +195,6 @@ setInterval(() => {
     fill:        false,
     borderColor: ['#fc0', 'rgb(75, 192, 192)'][i],
     data:        countBy(x => x.created_at.toISOString().slice(0, 13), x),
-    // backgroundColor: [
-    //
-    //   pattern.draw('square', '#ff6384'),
-    //   pattern.draw('circle', '#36a2eb'),
-    //   pattern.draw('diamond', '#cc65fe'),
-    //   pattern.draw('triangle', '#ffce56'),
-    // ],
-
   }), groupBy(prop('station'), filter(x => x.created_at > f && x.created_at < t, sortBy(prop('created_at'), Session.list)))))
 
   updateTimeChart(datasets)
