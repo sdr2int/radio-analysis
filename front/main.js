@@ -187,6 +187,7 @@ ws.on('session', map(s => {
 
 setInterval(() => {
   if (!window.Session.changed) return
+  window.Session.changed = false
 
   const [f, t] = DateRange.getDates()
 
@@ -195,9 +196,11 @@ setInterval(() => {
     fill:        false,
     borderColor: ['#fc0', 'rgb(75, 192, 192)'][i],
     data:        countBy(x => x.created_at.toISOString().slice(0, 13), x),
+    sessions:    x,
   }), groupBy(prop('station'), filter(x => x.created_at > f && x.created_at < t, sortBy(prop('created_at'), Session.list)))))
 
   updateTimeChart(datasets)
+  updateGraph(datasets)
 }, 300)
 
 
@@ -236,6 +239,7 @@ DateRange.change = () => {
 
 S('.daterange').map(x => x.addEventListener("changeDate", () => {
   M.updateStation()
+  Session.changed = true
   console.log('changeDate')
 }))
 
