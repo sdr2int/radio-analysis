@@ -102,7 +102,7 @@ uws
 uws.on('ping', () => {})
 uws.on("station:create", (ws, station) => pg.upsert('station', station))
 uws.on('stations', () => pg.exec('SELECT * FROM station'))
-uws.on('session', (ws, x) => pg.scan('SELECT * FROM session WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC', x, s => uws.emit(ws, 'session', s)))
+uws.on('session', (ws, x) => pg.scan(`SELECT * FROM session WHERE created_at >= $1 AND created_at <= $2 ORDER BY created_at DESC`, tap(console.log, x), s => uws.emit(ws, 'session', s)))
 uws.on('station:all', (ws, x) => pg.exec('SELECT * FROM station'))
 uws.on('station:sync', (ws, station) =>
   pg.execParams('SELECT * FROM station WHERE station = $1 ORDER BY date DESC LIMIT 1 ', [station]).then(([{address, path, station}]) => {
@@ -156,14 +156,13 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
 
 
   chokidar.watch('./csv').on('all', (event, filename) => {
-    console.log({filename, event})
     if (includes(event, ['addDir', 'unlink']) || !test(/\.csv$/, filename)) return
 
     console.log({filename, event})
     fs.createReadStream(filename)
       .pipe(csvParser(['date', 'time', 'colorcode', 'type', 'cid', 'rid', 'dcc', 'options']))
       .on('data', x =>
-        pg.upsert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${x.time}`))}), 'station, cid, rid, created_at, colorcode')
+        pg.upsert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${replace(/(\d+)\.(\d+)\.(\d+)/, '$1:$2:$3', x.time)}`))}), 'station, cid, rid, created_at, colorcode')
           .catch(console.error),
       )
       .on('end', () => {})
@@ -182,5 +181,5 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
       CREATE UNIQUE INDEX session_uniq_idx ON public."session" (station, cid, rid, created_at, colorcode);
     `))
 
-  uws.listen('127.0.0.1', 3000, listenSocket => pp({3000: 'listening'}))
+  uws.listen('127.0.0.1', 3003, listenSocket => pp({3003: 'listening'}))
 })

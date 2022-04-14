@@ -1,8 +1,9 @@
 Chart.defaults.color = 'white'
 const updateTimeChart = datasets => {
-  if (!window.TimeChart)
+  if (!window.TimeChart) {
+    if (isEmpty(datasets)) return
     createTimeChart(datasets)
-  else {
+  } else {
     TimeChart.data.datasets = datasets
     TimeChart.update()
   }

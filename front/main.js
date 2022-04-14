@@ -193,6 +193,8 @@ setInterval(() => {
 
   const [f, t] = DateRange.getDates()
 
+  t.setDate(t.getDate() + 1)
+
   const datasets  = values(addIndex(map)((x, i) => ({
     label:       head(x).station,
     fill:        false,
@@ -229,18 +231,24 @@ window.DatePicker = new Datepicker(I('date'), {autohide: true, language: 'uk'})
 DatePicker.setDate(new Date())
 
 window.DateRange = new DateRangePicker(I('daterange'), {autohide: true, language: 'uk'})
-const now = new Date('2015-08-01')
+const now = new Date() || new Date('2015-08-01')
 const from = clone(now)
 
+from.setYear(1990)
 from.setMonth(from.getMonth() - 3)
 DateRange.setDates(from, now)
 DateRange.change = () => {
-  ws.emit({session: DateRange.getDates()})
+  const dates = map(x => new Date(x.getTime() - x.getTimezoneOffset() * 60000), DateRange.getDates())
+
+  dates[1].setDate(dates[1].getDate() + 1)
+
+  ws.emit({session: dates})
   ws.emit({stations: {}})
 }
 
 S('.daterange').map(x => x.addEventListener("changeDate", () => {
   M.updateStation()
+  DateRange.change()
   Session.changed = true
   console.log('changeDate')
 }))
@@ -259,14 +267,16 @@ const mode = {
   graph: () => {
     S('#mode input').map(x => x.classList.remove('selected'))
     I('graph-mode').classList.add('selected')
-    I('map').style.display = 'none'
-    I('graph').style.display = 'block'
+    I('map').style.visibility = 'hidden'
+    I('graph').style.visibility = 'visible'
   },
   map:   () => {
     S('#mode input').map(x => x.classList.remove('selected'))
     I('map-mode').classList.add('selected')
-    I('graph').style.display = 'none'
-    I('map').style.display = 'block'
+    I('map').style.visibility = 'visible'
+    I('graph').style.visibility = 'hidden'
+    // I('graph').style.display = 'none'
+    // I('map').style.display = 'block'
   },
 }
 
