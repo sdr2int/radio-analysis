@@ -169,6 +169,19 @@ Station.edit = x => {
   }, x)
   DatePicker.setDate(new Date(x.date))
 }
+
+Station.add = x => {
+  Station.edit({
+    id:       '',
+    station:  '',
+    address:  '127.0.0.1',
+    date:     new Date(),
+    path:     '~/*.csv',
+    position: '',
+  })
+}
+
+
 Station.save = () => {
   ws.emit({'station:save': evolve({date: d => DatePicker.getDate()}, mergeAll(map(x => ({[x.id]: x.value}), I('values').S('input'))))})
 }

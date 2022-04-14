@@ -32,6 +32,8 @@ body
       input#map-mode(type='button' value='Карта' onclick='mode.map()')
       br
       input#upload(type='button' onclick='I("csv").click()' value='Завантажити CSV')
+      br
+      input#addStation(type='button' onclick='Station.add()' value='Додати пост')
         
       input#csv(type='file' value='Завантажити данні' onchange='uploadCSV()')
         
@@ -43,7 +45,7 @@ body
     #graph
       
     #panel
-      h4 Редагування посту радіорозвідки
+      b Редагування посту радіорозвідки
       #values
         input#id(type='hidden')
         .title Назва
@@ -53,7 +55,7 @@ body
         .title Дата встановлення
         input#date
         .title путь до файла
-        input#path(value='~/ForDemo.csv')
+        input#path(value='~/*.csv')
         .title координати
         input#position(disabled)
           
