@@ -40,6 +40,9 @@ body
     <div id="search">
       <input type="search" id="search-input" list="suggestions" placeholder="Пошук" />
       <datalist id="suggestions"></datalist>
+      #daterange
+        input#start.daterange(ondatechange='DateRange.change()')
+        input#end.daterange(onchange='DateRange.change()')
     </div>
     
     #graph
@@ -69,9 +72,6 @@ body
     #map
       
     #timechartContainer
-      #daterange
-        input#start.daterange(ondatechange='DateRange.change()')
-        input#end.daterange(onchange='DateRange.change()')
       canvas#timechart(width='100vw' height='15vh')
                     
   script(src="/main.js")

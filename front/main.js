@@ -183,12 +183,18 @@ Station.add = x => {
 
 
 Station.save = () => {
-  ws.emit({'station:save': evolve({date: d => DatePicker.getDate()}, mergeAll(map(x => ({[x.id]: x.value}), I('values').S('input'))))})
+  const station = evolve({date: d => DatePicker.getDate()}, mergeAll(map(x => ({[x.id]: x.value}), I('values').S('input'))))
+
+  if (isEmpty(station.id)) delete station.id
+
+  ws.emit({'station:save': station})
+  I('panel').style.display = 'none'
 }
 Station.sync = name => {
   ws.emit({'station:sync': name})
 }
 Station.position = () => {
+  mode.map()
   M.onclick = ({lat, long}) => {
     I('position').value = `${parseFloat(lat.toFixed(3))},${parseFloat(long.toFixed(3))}`
     M.onclick = () => {}
@@ -245,7 +251,7 @@ window.DateRange = new DateRangePicker(I('daterange'), {autohide: true, language
 const now = new Date() || new Date('2015-08-01')
 const from = clone(now)
 
-from.setYear(1990)
+// from.setYear(1990)
 from.setMonth(from.getMonth() - 3)
 DateRange.setDates(from, now)
 const getDates = () => {
