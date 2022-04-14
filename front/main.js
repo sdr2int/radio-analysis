@@ -191,9 +191,7 @@ setInterval(() => {
   if (!window.Session.changed) return
   window.Session.changed = false
 
-  const [f, t] = DateRange.getDates()
-
-  t.setDate(t.getDate() + 1)
+  const [f, t] = getDates()
 
   const datasets  = values(addIndex(map)((x, i) => ({
     label:       head(x).station,
@@ -237,12 +235,15 @@ const from = clone(now)
 from.setYear(1990)
 from.setMonth(from.getMonth() - 3)
 DateRange.setDates(from, now)
-DateRange.change = () => {
-  const dates = map(x => new Date(x.getTime() - x.getTimezoneOffset() * 60000), DateRange.getDates())
+const getDates = () => {
+  const dates = DateRange.getDates()
 
   dates[1].setDate(dates[1].getDate() + 1)
+  return dates
+}
 
-  ws.emit({session: dates})
+DateRange.change = () => {
+  ws.emit({session: getDates()})
   ws.emit({stations: {}})
 }
 
