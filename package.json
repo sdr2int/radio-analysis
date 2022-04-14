@@ -35,8 +35,8 @@
     "ramda": "^0.28.0",
     "sigma": "^2.3.0",
     "stylus": "^0.57.0",
-    "uwebsocket-serve": "^1.0.7",
     "uWebSockets.js": "uNetworking/uWebSockets.js#v20.3.0",
+    "uwebsocket-serve": "^1.0.7",
     "vanillajs-datepicker": "^1.2.0"
   }
 }

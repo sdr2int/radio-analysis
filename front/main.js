@@ -1,3 +1,5 @@
+const colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000']
+
 for (const m in R)
   if (['T', 'F'].indexOf(m) == -1) window[m] = R[m]
 
@@ -194,7 +196,7 @@ setInterval(() => {
   const datasets  = values(addIndex(map)((x, i) => ({
     label:       head(x).station,
     fill:        false,
-    borderColor: ['#fc0', 'rgb(75, 192, 192)'][i],
+    borderColor: colors[i],
     data:        countBy(x => x.created_at.toISOString().slice(0, 13), x),
     sessions:    x,
   }), groupBy(prop('station'), filter(x => x.created_at > f && x.created_at < t, sortBy(prop('created_at'), Session.list)))))

@@ -95,3 +95,9 @@ input {
 .selected {
   color: #ffa500;
 }
+#search {
+  position: absolute;
+  left: 1em;
+  z-index: 1000;
+  top: 1em;
+}

@@ -123,9 +123,9 @@ const CONNECTION_STRING = 'postgresql://localhost/radioanalysis'
 
 pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
   global.pg = client
-  pg.upsert = (table, data, conflict = 'id') => pg.execParams(tap(console.log, `INSERT INTO "${table}"
+  pg.upsert = (table, data, conflict = 'id') => pg.execParams(`INSERT INTO "${table}"
   (${keys(data)}) VALUES(${map(x => `$${x + 1}`, range(0, length(keys(data))))})
-  ON CONFLICT (${conflict}) DO UPDATE SET ${join(',', values(addIndex(map)((v, k) => `${v} = $${k + 1}`, keys(data))))}  RETURNING *;`), values(data))
+  ON CONFLICT (${conflict}) DO UPDATE SET ${join(',', values(addIndex(map)((v, k) => `${v} = $${k + 1}`, keys(data))))}  RETURNING *;`, values(data))
 
 
   pg.scan = (query, params = [], handler, batch = 100) => {
