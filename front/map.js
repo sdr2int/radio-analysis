@@ -6,6 +6,7 @@ window.M = new mapboxgl.Map({
   zoom:              1,
   boxZoom:           true,
   maxZoom:           17,
+  minZoom:   3,
   center:    [31, 49],
   zoom:      9,
 })
