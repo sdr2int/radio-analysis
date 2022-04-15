@@ -28,17 +28,20 @@ body
   
   #container
     #mode
-      input#graph-mode(type='button' value='Граф' onclick='mode.graph()')
-      input#map-mode(type='button' value='Карта' onclick='mode.map()')
+      input#en(type='button' value='eng' onclick="window.trans('en')")
+      input#uk(type='button' value='ukr' onclick='window.trans("uk")')
       br
-      input#upload(type='button' onclick='I("csv").click()' value='Завантажити CSV')
+      input#graph-mode(type='button' value='Graph' en='Graph' uk='Граф' onclick='mode.graph()')
+      input#map-mode(type='button' value='Map' en='Map' uk='Мапа' onclick='mode.map()')
       br
-      input#addStation(type='button' onclick='Station.add()' value='Додати пост')
+      input#upload(type='button' onclick='I("csv").click()' value='Upload CSV' en='Upload CSV' uk='Завантажити CSV')
+      br
+      input#addStation(type='button' onclick='Station.add()' value='Add site'  uk='Додати пост')
         
       input#csv(type='file' value='Завантажити данні' onchange='uploadCSV()')
         
     <div id="search">
-      <input type="search" id="search-input" list="suggestions" placeholder="Пошук" />
+      <input type="search" id="search-input" list="suggestions" placeholder="Search" en='Search' uk='Пошук' />
       <datalist id="suggestions"></datalist>
       #daterange
         input#start.daterange(ondatechange='DateRange.change()')
@@ -48,25 +51,25 @@ body
     #graph
       
     #panel
-      b Редагування посту радіорозвідки
+      b(uk='Редагування посту радіорозвідки') Edit site
       #values
         input#id(type='hidden')
-        .title Назва
+        .title(uk='Назва') Name
         input#station(value='Пост 1')
-        .title IP адреса
+        .title(uk='IP адреса') IP address
         input#address(value='127.0.0.1')
-        .title Дата встановлення
+        .title(uk='Дата встановлення') Install date
         input#date
-        .title путь до файла
+        .title(uk='путь до файла') sync files path
         input#path(value='~/*.csv')
-        .title координати
+        .title(uk='координати') Geoposition
         input#position(disabled)
           
       div#controls
-        input#position(type='button' value='Змінити позицію' onclick='Station.position()')
-        input#sync(type='button' onclick=`Station.sync(I("station").value)` value=`Перевірити зв'язок`)
-        input#save(type='button' onclick=`Station.save()` value=`Зберегти`)
-        input#hide(type='button' onclick=`I('panel').style.display = 'none'` value=`Відмінити`)
+        input#position(type='button' value='Change station' uk='Змінити позицію' onclick='Station.position()')
+        input#sync(type='button' onclick=`Station.sync(I("station").value)` value='Sync csv' uk=`Скачати CSV`)
+        input#save(type='button' onclick=`Station.save()` value='Save' uk=`Зберегти`)
+        input#hide(type='button' onclick=`I('panel').style.display = 'none'` value='Cancel' uk=`Відмінити`)
           
       
     #map

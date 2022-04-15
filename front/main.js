@@ -1,5 +1,47 @@
 const colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000']
 
+let interfaceLanguage = 'uk'
+let interfaceLanguages = ['en', 'uk']
+
+HTMLElement.prototype.trans = function (language = interfaceLanguage) {
+  const placeholder = this.getAttribute('placeholder')
+  const value = this.getAttribute('value')
+
+  if (this.getAttribute('translations')) {
+    mapObjIndexed((v, k) => this.setAttribute(k, v), JSON.parse(replace(/`/g, '"', this.getAttribute('translations'))))
+    this.removeAttribute('translations')
+  }
+
+  if (!this.getAttribute('en') && find(x => this.getAttribute(x), interfaceLanguages))
+    this.setAttribute('en', placeholder || value || this.innerHTML.replace(/\n.*/gim, ''))
+
+  const translations = reject(isNil, map(this.getAttribute.bind(this), interfaceLanguages))
+
+  if (length(translations) < 2) return
+
+  const f = new RegExp(join('|', map(replace(/([\[\\^$.|?*+()])/gim, '\\$1'), translations)))
+  const t = this.getAttribute(language)
+
+
+  if (placeholder)
+    return this.setAttribute('placeholder', placeholder.replace(f, t))
+
+  if (value) //TODO: check it's not text
+    return this.setAttribute('value', value.replace(f, t))
+
+
+  if (isEmpty(adjust(0, x => x.replaceWith(t), this.S('.loader'))))
+    this.innerHTML = this.innerHTML.replace(f, t)
+}
+
+window.trans = language => {
+  console.log(language)
+  interfaceLanguage = language || interfaceLanguage
+  idb.set('language', interfaceLanguage)
+  S('[uk]').map(x => x.trans(interfaceLanguage))
+}
+
+
 for (const m in R)
   if (['T', 'F'].indexOf(m) == -1) window[m] = R[m]
 
@@ -12,6 +54,8 @@ window.E = {
 window.popup = {close: () => {}}
 window.msgpack = msgpack5()
 window.idb = new IdbKvStore('df')
+
+idb.get('language').then(trans)
 
 window.pp = tap(x => console.log(JSON.stringify(x, null, ' ')))
 window.pe = tap(x => console.error(JSON.stringify(x, null, ' ')))

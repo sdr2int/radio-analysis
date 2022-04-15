@@ -14,7 +14,7 @@ window.updateGraph = datasets => {
     map(x => {
       // console.log(x)
       try {
-        graph.addNode(x.cid, {size: 25, label: x.cid, color: c(colors[x.colorcode], 20), x: 100, y: 20})
+        graph.addNode(x.cid, {size: 25, label: x.cid, color: c(colors[x.colorcode], 20), labelColor: 'white', x: 100, y: 20})
       } catch (e) {}
       try {
         graph.addNode(x.rid, {size: 15, label: x.rid, color: colors[x.colorcode], labelColor: 'red', x: 100, y: 20})
@@ -122,6 +122,11 @@ searchInput.addEventListener("blur", () => {
 
 // Sigma.settings.
 const renderer = new Sigma(graph, container, {
+  settings: {
+    minEdgeSize:   1,
+    maxEdgeSize:   4,
+    edgeLabelSize: 'proportional',
+  },
   // settings: {
   //   autoRescale:            ["nodePosition", "nodeSize"],
   //   labelThreshold:         0,
