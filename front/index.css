@@ -83,6 +83,7 @@ input {
   position: fixed;
   width: 100vw;
   height: 100vh;
+  background: #262422;
 }
 #mode {
   position: fixed;

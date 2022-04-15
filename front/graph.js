@@ -14,10 +14,10 @@ window.updateGraph = datasets => {
     map(x => {
       // console.log(x)
       try {
-        graph.addNode(x.cid, {size: 25, label: x.cid, color: c(colors[x.colorcode], 20), labelColor: 'white', x: 100, y: 20})
+        graph.addNode(x.cid, {size: 25, label: x.cid, color: c(colors[x.colorcode], 20), labelColor: "white", labelWeight: 'bold', x: 100, y: 20})
       } catch (e) {}
       try {
-        graph.addNode(x.rid, {size: 15, label: x.rid, color: colors[x.colorcode], labelColor: 'red', x: 100, y: 20})
+        graph.addNode(x.rid, {size: 15, label: x.rid, color: colors[x.colorcode], labelColor: 'white', x: 100, y: 20})
       } catch (e) {}
 
       try {
@@ -120,13 +120,80 @@ searchInput.addEventListener("blur", () => {
   setSearchQuery("")
 })
 
+function labelRenderer (context, data, settings) {
+  if (!data.label) return
+
+  const size = settings.labelSize
+  const font = settings.labelFont
+  const weight = data.labelWeight || settings.labelWeight
+
+  const color = settings.labelColor.attribute
+    ? data[settings.labelColor.attribute] || settings.labelColor.color || "#fff"
+    : settings.labelColor.color
+
+  context.fillStyle = color
+  context.font = `${weight} ${size}px ${font}`
+
+  context.fillText(data.label, data.x + data.size + 3, data.y + size / 3)
+}
+
+function hoverRenderer (context, data, settings) {
+  const size = settings.labelSize
+  const font = settings.labelFont
+  const weight = settings.labelWeight
+
+  context.font = `${weight} ${size}px ${font}`
+
+  // Then we draw the label background
+  context.fillStyle = "#262422"
+  context.shadowOffsetX = 0
+  context.shadowOffsetY = 0
+  context.shadowBlur = 8
+  context.shadowColor = "#000"
+
+  const PADDING = 2
+
+  if (typeof data.label === "string") {
+    const textWidth = context.measureText(data.label).width
+    const boxWidth = Math.round(textWidth + 5)
+    const boxHeight = Math.round(size + 2 * PADDING)
+    const radius = Math.max(data.size, size / 2) + PADDING
+
+    const angleRadian = Math.asin(boxHeight / 2 / radius)
+    const xDeltaCoord = Math.sqrt(Math.abs(Math.pow(radius, 2) - Math.pow(boxHeight / 2, 2)))
+
+    context.beginPath()
+    context.moveTo(data.x + xDeltaCoord, data.y + boxHeight / 2)
+    context.lineTo(data.x + radius + boxWidth, data.y + boxHeight / 2)
+    context.lineTo(data.x + radius + boxWidth, data.y - boxHeight / 2)
+    context.lineTo(data.x + xDeltaCoord, data.y - boxHeight / 2)
+    context.arc(data.x, data.y, radius, angleRadian, -angleRadian)
+    context.closePath()
+    context.fill()
+  } else {
+    context.beginPath()
+    context.arc(data.x, data.y, data.size + PADDING, 0, Math.PI * 2)
+    context.closePath()
+    context.fill()
+  }
+
+  context.shadowOffsetX = 0
+  context.shadowOffsetY = 0
+  context.shadowBlur = 0
+
+  // // And finally we draw the label
+  labelRenderer(context, data, settings)
+}
+
 // Sigma.settings.
 const renderer = new Sigma(graph, container, {
-  settings: {
-    minEdgeSize:   1,
-    maxEdgeSize:   4,
-    edgeLabelSize: 'proportional',
-  },
+  minEdgeSize:      1,
+  maxEdgeSize:      4,
+  edgeLabelSize:    'proportional',
+  labelColor:       {attribute: "labelColor"},
+  // edgeLabelColor:   {color: "#000"},
+  hoverRenderer,
+  labelRenderer,
   // settings: {
   //   autoRescale:            ["nodePosition", "nodeSize"],
   //   labelThreshold:         0,
@@ -168,9 +235,11 @@ renderer.setSetting("nodeReducer", (node, data) => {
   // const res: Partial<NodeDisplayData> = { ...data };
   const res = data
 
-  if (state.hoveredNeighbors && !state.hoveredNeighbors.has(node) && state.hoveredNode !== node) {
-    res.label = ""
-    res.color = "#f6f6f6"
+  if (state.hoveredNeighbors && !state.hoveredNeighbors.has(node)) {
+    if (state.hoveredNode !== node) {
+      res.label = ""
+      res.color = "#f6f6f6"
+    }
   }
 
   if (state.selectedNode === node)

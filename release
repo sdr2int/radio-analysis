@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 cd ..
-rsync --inplace --update --checksum --compress --delete --human-readable --links --verbose --recursive --progress radioanalysis root@up58.co:/home/vganzin --exclude node_modules --exclude .git
+rsync --inplace --update --checksum --compress --delete --human-readable --links --verbose --recursive --progress radioanalysis up58.co:/home/vganzin --exclude node_modules --exclude .git
 
-ssh root@up58.co /home/vganzin/radioanalysis/install
+ssh up58.co "/home/vganzin/radioanalysis/install"
+ssh up58.co "systemctl --user restart radioanalysis"
