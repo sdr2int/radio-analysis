@@ -14,15 +14,32 @@ window.updateGraph = datasets => {
     map(x => {
       // console.log(x)
       try {
-        graph.addNode(x.cid, {size: 25, label: x.cid, color: c(colors[x.colorcode], 20), labelColor: "white", labelWeight: 'bold', x: 100, y: 20})
-      } catch (e) {}
+        graph.addNode(x.cid, {size: 30, label: x.cid, color: c(colors[x.colorcode], 20), labelColor: "white", labelWeight: 'bold', count: 1, type: "image", image: "./station.svg"})
+      } catch (e) {
+        graph.updateNode(x.cid, attr => ({
+          ...attr,
+          count: attr.count + 1,
+        }))
+      }
       try {
-        graph.addNode(x.rid, {size: 15, label: x.rid, color: colors[x.colorcode], labelColor: 'white', x: 100, y: 20})
-      } catch (e) {}
+        graph.addNode(x.rid, {size: 15, label: x.rid, color: colors[x.colorcode], labelColor: 'white', count: 1, type: "image", image: "./user.svg"})
+      } catch (e) {
+        graph.updateNode(x.rid, attr => ({
+          ...attr,
+          count: attr.count + 1,
+        }))
+      }
 
       try {
-        graph.addEdge(x.cid, x.rid, {type: "line", size: 1})
-      } catch (e) {}
+        graph.addEdge(x.cid, x.rid, {type: "line", size: 1, count: 1, label: 1})
+      } catch (e) {
+        graph.updateEdge(x.cid, x.rid, attr => ({
+          ...attr,
+          count: attr.count + 1,
+          label: String(attr.count),
+          size:  Math.ceil(Math.sqrt(attr.count) / 3),
+        }))
+      }
     }, station.sessions)
   }, datasets)
 
@@ -134,7 +151,7 @@ function labelRenderer (context, data, settings) {
   context.fillStyle = color
   context.font = `${weight} ${size}px ${font}`
 
-  context.fillText(data.label, data.x + data.size + 3, data.y + size / 3)
+  context.fillText(`${data.label} [${data.count}]`, data.x + data.size + 3, data.y + size / 3)
 }
 
 function hoverRenderer (context, data, settings) {
@@ -187,15 +204,14 @@ function hoverRenderer (context, data, settings) {
 
 // Sigma.settings.
 const renderer = new Sigma(graph, container, {
-  minEdgeSize:      1,
-  maxEdgeSize:      4,
-  edgeLabelSize:    'proportional',
-  labelColor:       {attribute: "labelColor"},
+  minEdgeSize:        1,
+  maxEdgeSize:        4,
+  edgeLabelSize:      'proportional',
+  labelColor:         {attribute: "labelColor"},
   // edgeLabelColor:   {color: "#000"},
   hoverRenderer,
   labelRenderer,
-  // settings: {
-  //   autoRescale:            ["nodePosition", "nodeSize"],
+  autoRescale:            ["nodePosition", "nodeSize"],
   //   labelThreshold:         0,
   //   adjustSizes:            true,
   //   fixed:                  true,
@@ -206,11 +222,10 @@ const renderer = new Sigma(graph, container, {
   //   minArrowSize:           7,
   //   drawLabels:             false,
   //   edgeLabelColor:         '#fff',
-  // },
-  // nodeProgramClasses: {
-  //   // image:  getNodeProgramImage(),
+  nodeProgramClasses: {
+    image:  getNodeProgramImage(),
   //   // border: NodeProgramBorder,
-  // },
+  },
   renderEdgeLabels:  true,
 })
 
@@ -232,7 +247,6 @@ renderer.on("leaveNode", () => {
 
 
 renderer.setSetting("nodeReducer", (node, data) => {
-  // const res: Partial<NodeDisplayData> = { ...data };
   const res = data
 
   if (state.hoveredNeighbors && !state.hoveredNeighbors.has(node)) {
@@ -255,13 +269,7 @@ renderer.setSetting("nodeReducer", (node, data) => {
   return res
 })
 
-// Render edges accordingly to the internal state:
-// 1. If a node is hovered, the edge is hidden if it is not connected to the
-//    node
-// 2. If there is a query, the edge is only visible if it connects two
-//    suggestions
 renderer.setSetting("edgeReducer", (edge, data) => {
-  // const res: Partial<EdgeDisplayData> = { ...data };
   const res = data
 
   if (state.hoveredNode && !graph.hasExtremity(edge, state.hoveredNode))
@@ -274,10 +282,3 @@ renderer.setSetting("edgeReducer", (edge, data) => {
 
   return res
 })
-
-// // Create the spring layout and start it
-// const layout = new ForceSupervisor(graph);
-// layout.start();
-
-// Changes the RGB/HEX temporarily to a HSL-Value, modifies that value
-// and changes it back to RGB/HEX.
