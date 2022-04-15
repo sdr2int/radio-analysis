@@ -49,6 +49,21 @@ uws.emit = curry((ws, event, data) => {
 })
 
 uws
+  .get('/*', (res, req) => {
+    const url = req.getUrl().slice(1) || 'index.html'
+    const filepath = require('path').resolve('front', url)
+
+    res.onAborted(() => console.error('UPLOAD ABORTED'))
+
+    fs.promises.readFile(filepath, {encoding: 'utf-8'}).then(file => {
+      res.writeHeader('Content-Type', mrmime.lookup(String(filepath)))
+      res.end(file)
+    })
+      .catch(() => {
+        res.writeStatus('404')
+        res.end()
+      })
+  })
   .post('/csv', async (res, req) => {
     const {fileName} = {...querystring.parse(req.getQuery())}
 
@@ -65,7 +80,6 @@ uws
     })
     res.end('file uploaded')
   })
-  .get('/*', uwebsocketServe.serveDir('front'))
   .ws('/*', {
     compression:      uws.DEDICATED_COMPRESSOR_32KB,
     maxPayloadLength: 16 * 1024 * 1024,
@@ -162,7 +176,10 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
     fs.createReadStream(filename)
       .pipe(csvParser(['date', 'time', 'colorcode', 'type', 'cid', 'rid', 'dcc', 'options']))
       .on('data', x =>
-        pg.upsert('session', mergeWith(identity, omit(['date', 'time'], x), {station: replace(/csv\/|\.csv/g, '', filename), created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date)} ${replace(/(\d+)\.(\d+)\.(\d+)/, '$1:$2:$3', x.time)}`))}), 'station, cid, rid, created_at, colorcode')
+        pg.upsert('session', mergeWith(identity, omit(['date', 'time'], x), {
+          station:    replace(/csv\/|\.csv/g, '', filename || ''),
+          created_at: new Date(Date.parse(`${replace(/(\d+)\.(\d+)\.(\d+)/, '$3-$2-$1', x.date || '')} ${replace(/(\d+)\.(\d+)\.(\d+)/, '$1:$2:$3', x.time || '')}`)),
+        }), 'station, cid, rid, created_at, colorcode')
           .catch(console.error),
       )
       .on('end', () => {})
@@ -181,5 +198,5 @@ pgLibpq.connect('postgresql://localhost/radioanalysis').then(client => {
       CREATE UNIQUE INDEX session_uniq_idx ON public."session" (station, cid, rid, created_at, colorcode);
     `))
 
-  uws.listen('127.0.0.1', 3003, listenSocket => pp({3003: 'listening'}))
+  uws.listen('0.0.0.0', 3003, listenSocket => pp({3003: 'listening'}))
 })

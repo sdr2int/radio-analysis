@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+cd ..
+rsync --inplace --update --checksum --compress --delete --human-readable --links --verbose --recursive --progress radio-analysis root@up58.co:/home/vganzin --exclude node_modules --exclude .git
+
+ssh root@up58.co /home/vganzin/radioanalysis/install

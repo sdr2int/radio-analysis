@@ -2,7 +2,7 @@
 
 npm install
 wget https://unpkg.com/colvertize@0.1.0 --output-file front/colvertize.js
-cp ../node_modules/chart.js/dist/chart.min.js front
-cp ../node_modules/chartjs-plugin-crosshair/dist/chartjs-plugin-crosshair.min.js front
+cp ./node_modules/chart.js/dist/chart.min.js front
+cp ./node_modules/chartjs-plugin-crosshair/dist/chartjs-plugin-crosshair.min.js front
 cp -ruv node_modules/vanillajs-datepicker/dist/js/datepicker-full.min.js front/
-sudo su postgres -c "psql -c 'CREATE DATABASE \"radio-analysis\"'"
+#sudo su postgres -c "psql -c 'CREATE DATABASE \"radio-analysis\"'"
