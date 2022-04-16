@@ -208,6 +208,7 @@ window.Station = {
 
 Station.edit = x => {
   I('panel').style.display = 'block'
+  Station.position()
   mapObjIndexed((v, k) => {
     if (I(k)) I(k).value = v
   }, x)
@@ -225,6 +226,14 @@ Station.add = x => {
   })
 }
 
+
+Station.delete = station => ws.emit({'station:delete': station})
+
+ws.on('station:delete', ([{id}]) => {
+  Station.list = reject(x => x.id == id, Station.list)
+  M.updateStation()
+  I('panel').style.display = 'none'
+})
 
 Station.save = () => {
   const station = evolve({date: d => DatePicker.getDate()}, mergeAll(map(x => ({[x.id]: x.value}), I('values').S('input'))))

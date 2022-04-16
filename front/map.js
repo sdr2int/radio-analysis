@@ -52,7 +52,7 @@ M.on('load', () => {
         ['get', 'point_count'],
         '#fb0',
         100,
-        '#fb0',
+        '#fff',
         750,
         '#fb0',
       ],

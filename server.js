@@ -130,6 +130,9 @@ uws.on('station:sync', (ws, station) =>
     return 'ok'
   }),
 )
+
+uws.on('station:delete', (ws, station) => pg.execParams("DELETE FROM station WHERE station=$1 RETURNING id", [station]))
+
 uws.on('station:save', (ws, data) => pg.upsert('station', data).catch(console.log))
 
 

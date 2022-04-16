@@ -69,6 +69,7 @@ body
         input#position(type='button' value='Change station' uk='Змінити позицію' onclick='Station.position()')
         input#sync(type='button' onclick=`Station.sync(I("station").value)` value='Sync csv' uk=`Скачати CSV`)
         input#save(type='button' onclick=`Station.save()` value='Save' uk=`Зберегти`)
+        input#save(type='button' onclick=`Station.delete(I("station").value)` value='Delete' uk=`Видалити`)
         input#hide(type='button' onclick=`I('panel').style.display = 'none'` value='Cancel' uk=`Відмінити`)
           
       
